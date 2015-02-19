@@ -25,8 +25,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 /**
- * Main activity, contains listview of user photos and calls async task
- * that requests to load them
+ * Main activity, contains listview of user photos
  * @author drice
  *
  */
