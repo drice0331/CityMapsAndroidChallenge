@@ -1,0 +1,13 @@
+package com.citymaps.userphotodisplay.util;
+
+import android.os.AsyncTask;
+
+public class LoadAvatarTask extends AsyncTask<Void, Void, String> {
+
+	@Override
+	protected String doInBackground(Void... params) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

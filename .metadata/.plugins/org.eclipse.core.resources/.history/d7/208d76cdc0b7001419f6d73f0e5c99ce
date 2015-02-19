@@ -1,0 +1,21 @@
+package com.citymaps.userphotodisplay.ui;
+
+import android.app.Activity;
+import android.content.res.Configuration;
+import android.os.Bundle;
+
+public class BaseActivity extends Activity {
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		lockOrientation();
+	}
+	
+	protected void lockOrientation() {
+		int orientation = this.getResources().getConfiguration().orientation;
+	}
+	
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		int orientation = this.getResources().getConfiguration().orientation;
+	}
+}

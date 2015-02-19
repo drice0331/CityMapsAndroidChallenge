@@ -1,0 +1,9 @@
+<resources>
+
+    <string name="app_name">CitymapsUserPhotoDisplay</string>
+
+    <string name="title_activity_launch">Launch Me</string>
+    <string name="login">Login</string>
+    <string name="name_hint">Name</string>
+    
+</resources>

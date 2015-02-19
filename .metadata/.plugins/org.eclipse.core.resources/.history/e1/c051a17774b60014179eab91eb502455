@@ -1,0 +1,71 @@
+package com.citymaps.userphotodisplay.view;
+
+import android.content.Context;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.GridLayoutAnimationController;
+import android.widget.AbsListView;
+import android.widget.GridView;
+import android.widget.AbsListView.OnScrollListener;
+
+public class LoadingGridView extends GridView implements OnScrollListener{
+
+	private OnScrollListener mOnScrollListener;
+	
+	public LoadingGridView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		init(context);
+		// TODO Auto-generated constructor stub
+	}
+
+	private void init(Context context) {
+		super.setOnScrollListener(this);
+	}
+	/**
+	 * Set the listener that will receive notifications every time the list
+	 * scrolls.
+	 * 
+	 * @param onScrollListener
+	 */
+	@Override
+	public void setOnScrollListener(AbsListView.OnScrollListener onScrollListener) {
+		mOnScrollListener = onScrollListener;
+	}
+	
+	@Override
+	public void onScrollStateChanged(AbsListView view, int scrollState) {
+		// TODO Auto-generated method stub
+		Log.d("grid view", "scrolling state changed");
+		if (mOnScrollListener != null) {
+			mOnScrollListener.onScrollStateChanged(view, scrollState);
+		}
+	}
+
+	@Override
+	public void onScroll(AbsListView view, int firstVisibleItem,
+			int visibleItemCount, int totalItemCount) {
+		Log.d("grid view", "scrolling ");
+		if (mOnScrollListener != null) {
+			mOnScrollListener.onScroll(view, firstVisibleItem,
+					visibleItemCount, totalItemCount);
+		}
+	}
+	
+	@Override 
+	protected void attachLayoutAnimationParameters(View child,ViewGroup.LayoutParams params,int index,int count){
+		  GridLayoutAnimationController.AnimationParameters animationParams=(GridLayoutAnimationController.AnimationParameters)params.layoutAnimationParameters;
+		  if (animationParams == null) {
+		    animationParams=new GridLayoutAnimationController.AnimationParameters();
+		    params.layoutAnimationParameters=animationParams;
+		  }
+		  animationParams.count=count;
+		  animationParams.index=index;
+		  //animationParams.columnsCount=mNumColumns;
+		  //animationParams.rowsCount=mNumRows;
+		  //animationParams.column=index % mNumColumns;
+		  //animationParams.row=index / mNumColumns;
+	}
+	
+}

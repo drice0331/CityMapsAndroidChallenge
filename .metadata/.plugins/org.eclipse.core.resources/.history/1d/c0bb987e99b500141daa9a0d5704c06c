@@ -1,0 +1,40 @@
+package com.citymaps.userphotodisplay.util;
+
+import java.util.ArrayList;
+
+import com.citymaps.userphotodisplay.model.Photo;
+
+import android.content.Context;
+import android.os.AsyncTask;
+
+public class GetUserPhotosTask extends AsyncTask<Void,Void,ArrayList<Photo>>{
+
+	GetUserPhotosTaskListener listener;
+	
+	public GetUserPhotosTask(GetUserPhotosTaskListener listener) {
+		this.listener = listener;
+	}
+	
+	@Override
+	protected void onPreExecute() {
+		listener.onTaskPreExecute();
+	}
+	
+	@Override
+	protected ArrayList<Photo> doInBackground(Void... params) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	protected void onPostExecute(ArrayList<Photo> photos) {
+		listener.onTaskPostExecute();
+	}
+
+	public interface GetUserPhotosTaskListener {
+		void onTaskPreExecute();
+		void onTaskBackgroundWork();
+		void onTaskPostExecute();
+	}
+	
+}

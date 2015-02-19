@@ -1,0 +1,138 @@
+package com.citymaps.userphotodisplay.ui;
+
+import java.util.ArrayList;
+
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
+import com.citymaps.userphotodisplay.R;
+import com.citymaps.userphotodisplay.adapter.LoadingListViewAdapter;
+import com.citymaps.userphotodisplay.model.UserPhoto;
+import com.citymaps.userphotodisplay.model.UserPhotoList;
+import com.citymaps.userphotodisplay.util.LoadAvatarTask;
+import com.citymaps.userphotodisplay.util.LoadUserPhotosTask;
+import com.citymaps.userphotodisplay.util.MyVolleySingleton;
+import com.citymaps.userphotodisplay.util.UserJsonParser;
+import com.citymaps.userphotodisplay.view.LoadMoreListView;
+
+import android.app.Activity;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
+public class PhotoDisplayActivity extends Activity implements
+		LoadAvatarTask.LoadAvatarTaskListener,
+		LoadUserPhotosTask.LoadUserPhotosTaskListener,
+		LoadMoreListView.OnLoadMoreListener {
+
+	private final static String TAG = "PhotoDisplayActivity";
+
+	ArrayList<UserPhoto> mItems;
+
+	ProgressBar spinner;
+	ImageLoader mImageLoader;
+	LoadMoreListView listView;
+	LoadingListViewAdapter adapter;
+	SharedPreferences prefs;
+	TextView username;
+	NetworkImageView avatarImageView;
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_photo_display);
+
+        mImageLoader = MyVolleySingleton.getInstance(this).getImageLoader();
+        
+		listView = (LoadMoreListView) findViewById(R.id.listview);
+		
+		prefs = this.getSharedPreferences("com.citymaps.userphotodisplay", 0);
+		username = (TextView)findViewById(R.id.username);
+		username.setText(prefs.getString("username", "Aaron Rudenstine"));
+		
+		avatarImageView = (NetworkImageView)findViewById(R.id.avatar);
+		new LoadAvatarTask(this).execute();
+		
+		spinner = (ProgressBar)findViewById(R.id.progressSpinner);
+		mItems = UserPhotoList.get(this).getUserPhotoList();
+
+		adapter = new LoadingListViewAdapter(this, android.R.layout.simple_list_item_1, mItems, mImageLoader);
+		listView.setAdapter(adapter);
+		
+		new LoadUserPhotosTask(this).execute();
+
+		listView.setOnLoadMoreListener(this);
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		Log.i(TAG, "Background thread destroyed");
+	}
+
+	/**
+	 * preExecute callback from LoadUserPhotoTask, does nothing right now but
+	 * could be used for showing pre loading UI stuff
+	 */
+	@Override
+	public void onTaskPreExecute() {
+		Log.i(TAG, "pre executing");
+	}
+
+	/**
+	 * postExecute callback from LoadUserPhotoTask, sets spinner to gone and
+	 * listview to visible, as well as informs the listview that it has completed
+	 * retrieving info
+	 */
+	@Override
+	public void onTaskPostExecute() {
+		Log.i(TAG, "post executing");
+		updateAdapter();
+		spinner.setVisibility(View.GONE);
+		listView.setVisibility(View.VISIBLE);
+		listView.onLoadMoreComplete();
+	}
+
+	@Override
+	public void onTaskCancel() {
+		listView.onLoadMoreComplete();
+	}
+
+	void updateAdapter() {
+		if (mItems == null || listView == null) {
+			Log.d("TAG", "photo list null");
+			return;
+		}
+		if (mItems != null) {
+			if (adapter != null) {
+				adapter.notifyDataSetChanged();
+			} 
+
+		} else {
+			listView.setAdapter(null);
+		}
+	}
+
+	@Override
+	public void onLoadMore() {
+		new LoadUserPhotosTask(this).execute();		
+	}
+
+	@Override
+	public void onAvatarTaskPostExecute(String result) {
+		avatarImageView.setErrorImageResId(R.drawable.error);
+		Log.i(TAG, "avatar task result - " + result);
+		
+		//this is what's in the api, get an error if loading without https - stinks but 
+		//this is the way that works :(
+		if(result.equals("http://graph.facebook.com/4735/picture?width=100&height=100")) {
+			result = "https://graph.facebook.com/4735/picture?width=100&height=100";
+		}
+		avatarImageView.setImageUrl("result", mImageLoader);
+	}
+
+
+	
+}

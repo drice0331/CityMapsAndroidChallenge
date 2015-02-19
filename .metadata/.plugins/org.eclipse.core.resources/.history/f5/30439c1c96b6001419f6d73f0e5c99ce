@@ -1,0 +1,142 @@
+package com.citymaps.userphotodisplay.view;
+
+import android.content.Context;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.GridLayoutAnimationController;
+import android.widget.AbsListView;
+import android.widget.GridView;
+import android.widget.AbsListView.OnScrollListener;
+
+public class LoadingGridView extends GridView implements OnScrollListener{
+	
+	private static final String TAG = "Loading Grid View";
+	
+	private OnScrollListener mOnScrollListener;
+	private OnLoadMoreListener mOnLoadMoreListener;
+	private int currentScrollState;
+	
+	// To know if the list is loading more items
+	private boolean mIsLoadingMore = false;
+	
+	public LoadingGridView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		init(context);
+		// TODO Auto-generated constructor stub
+	}
+	
+	private void init(Context context) {
+		super.setOnScrollListener(this);
+		currentScrollState = AbsListView.OnScrollListener.SCROLL_STATE_IDLE;
+	}
+	/**
+	 * Set the listener that will receive notifications every time the list
+	 * scrolls.
+	 * 
+	 * @param onScrollListener
+	 */
+	@Override
+	public void setOnScrollListener(AbsListView.OnScrollListener onScrollListener) {
+		mOnScrollListener = onScrollListener;
+	}
+	
+	/**
+	 * Register a callback to be invoked when this list reaches the end (last
+	 * item be visible)
+	 * 
+	 * @param onLoadMoreListener
+	 *            The callback to run.
+	 */
+
+	public void setOnLoadMoreListener(OnLoadMoreListener onLoadMoreListener) {
+		mOnLoadMoreListener = onLoadMoreListener;
+	}	
+	
+	@Override
+	public void onScrollStateChanged(AbsListView view, int scrollState) {
+		// TODO Auto-generated method stub
+		Log.d("grid view", "scrolling state changed " + scrollState);
+		this.currentScrollState = scrollState;
+		if (mOnScrollListener != null) {
+			mOnScrollListener.onScrollStateChanged(view, scrollState);
+		}
+		
+		
+		
+	}
+
+	@Override
+	public void onScroll(AbsListView view, int firstVisibleItem,
+			int visibleItemCount, int totalItemCount) {
+		if (mOnScrollListener != null) {
+			mOnScrollListener.onScroll(view, firstVisibleItem,
+					visibleItemCount, totalItemCount);			
+		}
+		
+		Log.d(TAG, "scrolling - firstVisibleItem = " + firstVisibleItem + " visibleItemCount = " + visibleItemCount + " totalItemCount = " + totalItemCount);
+		
+		if (mOnLoadMoreListener != null) {
+
+			if (visibleItemCount == totalItemCount) {
+				//mProgressBarLoadMore.setVisibility(View.GONE);
+				Log.d(TAG, "scrolling - visibleitems = totalitems (count)");
+				return;
+			}
+
+			boolean loadMore = firstVisibleItem + visibleItemCount >= totalItemCount;
+
+			if (!mIsLoadingMore && loadMore
+					&& currentScrollState != SCROLL_STATE_IDLE) {
+				//mProgressBarLoadMore.setVisibility(View.VISIBLE);
+				mIsLoadingMore = true;
+				onLoadMore();
+			}
+
+		}
+	}
+	
+	@Override 
+	protected void attachLayoutAnimationParameters(View child,ViewGroup.LayoutParams params,int index,int count){
+		  GridLayoutAnimationController.AnimationParameters animationParams=(GridLayoutAnimationController.AnimationParameters)params.layoutAnimationParameters;
+		  if (animationParams == null) {
+		    animationParams=new GridLayoutAnimationController.AnimationParameters();
+		    params.layoutAnimationParameters=animationParams;
+		  }
+		  animationParams.count=count;
+		  animationParams.index=index;
+		  //animationParams.columnsCount=mNumColumns;
+		  //animationParams.rowsCount=mNumRows;
+		  //animationParams.column=index % mNumColumns;
+		  //animationParams.row=index / mNumColumns;
+	}
+	
+	public void onLoadMore() {
+		Log.d(TAG, "onLoadMore");
+		if (mOnLoadMoreListener != null) {
+			mOnLoadMoreListener.onLoadMore();
+		}
+	}
+
+	/**
+	 * Notify the loading more operation has finished
+	 */
+	public void onLoadMoreComplete() {
+		mIsLoadingMore = false;
+		//mProgressBarLoadMore.setVisibility(View.GONE);
+	}
+
+	/**
+	 * Interface definition for a callback to be invoked when list reaches the
+	 * last item (the user load more items in the list)
+	 */
+	public interface OnLoadMoreListener {
+		/**
+		 * Called when the list reaches the last item (the last item is visible
+		 * to the user)
+		 */
+		public void onLoadMore();
+	}
+	
+}

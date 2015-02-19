@@ -1,0 +1,144 @@
+package com.citymaps.userphotodisplay.ui;
+
+import java.util.ArrayList;
+
+import com.citymaps.userphotodisplay.R;
+import com.citymaps.userphotodisplay.adapter.LoadingGridViewAdapter;
+import com.citymaps.userphotodisplay.model.UserPhoto;
+import com.citymaps.userphotodisplay.util.GetUserPhotosTask;
+import com.citymaps.userphotodisplay.util.PhotoDownloader;
+import com.citymaps.userphotodisplay.view.LoadingGridView;
+import com.citymaps.userphotodisplay.view.LoadingImageView;
+
+import android.app.Activity;
+import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.GridLayoutAnimationController;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+
+public class PhotoDisplayActivity extends Activity implements
+		GetUserPhotosTask.GetUserPhotosTaskListener, OnScrollListener, LoadingGridView.OnLoadMoreListener {
+
+	private final static String TAG = "PhotoDisplayActivity";
+	
+	ArrayList<UserPhoto> mItems;
+
+	LoadingGridView gridview;
+	
+	PhotoDownloader<LoadingImageView> mPhotoDownloaderThread;
+	
+	private ProgressBar spinner;
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_photo_display);
+
+		Animation fadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in);
+
+		gridview = (LoadingGridView)findViewById(R.id.gridview);
+		gridview.setVisibility(View.INVISIBLE);
+		//gridview.setLayoutAnimation(new GridLayoutAnimationController(fadeIn, .2f, .2f));
+		//GridLayoutAnimationController controller = new GridLayoutAnimationController(animation, .2f, .2f);
+		//gridview.startAnimation(animation);
+		//gridview.setAnimation(animation);
+		
+		mItems = new ArrayList<UserPhoto>();
+		new GetUserPhotosTask(this).execute(mItems);
+		//updateAdapter();
+		
+		mPhotoDownloaderThread = new PhotoDownloader<LoadingImageView>(new Handler(), mItems);
+		mPhotoDownloaderThread.setListener(new PhotoDownloader.Listener<LoadingImageView>() {
+			public void onThumbnailDownloaded(LoadingImageView loadingImageView, Bitmap thumbnail, UserPhoto photo) {
+				//if(isVisible()) {
+				if(photo.isBitmapLoaded() == true) {
+					loadingImageView.setImageBitmap(thumbnail);
+					loadingImageView.animateFadeIn();
+					Log.d(TAG, "downloaded image ");
+					//imageView.startAnimation(animation);
+				}
+			}
+		});
+		mPhotoDownloaderThread.start();
+		mPhotoDownloaderThread.getLooper();
+		
+		gridview.setOnScrollListener(this);
+		gridview.setOnLoadMoreListener(this);
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		mPhotoDownloaderThread.clearQueue();
+		mPhotoDownloaderThread.quit();
+		Log.i(TAG, "Background thread destroyed");
+	}
+	
+	@Override
+	public void onTaskPreExecute() {
+		Log.i(TAG, "pre executing");
+		//loading animation
+		spinner = (ProgressBar)findViewById(R.id.progressBar1);
+		spinner.setVisibility(View.VISIBLE);
+	}
+
+	@Override
+	public void onTaskPostExecute(ArrayList<UserPhoto> photos) {
+		Log.i(TAG, "post executing");
+		mItems = photos;
+		updateAdapter();
+		spinner.setVisibility(View.GONE);
+		gridview.setVisibility(View.VISIBLE);
+	}
+
+	//TODO-test onclick method, get rid of later
+	public void taskFetch(View view) {
+		new GetUserPhotosTask(this).execute(mItems);
+	}
+	
+	void updateAdapter() {
+		Log.d("TAG", "set up adapter");
+		if(mItems == null || gridview == null) {
+			Log.d("TAG", "photo list null");
+			
+			return;
+		}
+		if(mItems != null)
+		{
+			gridview.setAdapter(new LoadingGridViewAdapter(this, mItems, mPhotoDownloaderThread));
+		}
+		else {
+			gridview.setAdapter(null);
+		}
+	}
+
+	@Override
+	public void onScrollStateChanged(AbsListView view, int scrollState) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onScroll(AbsListView view, int firstVisibleItem,
+			int visibleItemCount, int totalItemCount) {
+		Log.d("grid view", "scrolling - firstVisibleItem = " + firstVisibleItem + " visibleItemCount = " + visibleItemCount + " totalItemCount = " + totalItemCount);
+
+		//		new GetUserPhotosTask(this).execute(mItems);		
+	}
+
+	@Override
+	public void onLoadMore() {
+		new GetUserPhotosTask(this).execute(mItems);
+		
+	}
+
+}

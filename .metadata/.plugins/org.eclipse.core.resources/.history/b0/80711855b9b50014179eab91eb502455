@@ -1,0 +1,16 @@
+package com.citymaps.userphotodisplay.view;
+
+import android.content.Context;
+import android.widget.AbsListView;
+import android.widget.GridView;
+import android.widget.AbsListView.OnScrollListener;
+
+public class LoadingGridView extends GridView{
+
+	public LoadingGridView(Context context) {
+		super(context);
+		// TODO Auto-generated constructor stub
+	}
+
+	
+}

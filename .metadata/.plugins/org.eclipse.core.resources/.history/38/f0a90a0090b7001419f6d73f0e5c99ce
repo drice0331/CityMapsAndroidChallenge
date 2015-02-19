@@ -1,0 +1,153 @@
+package com.citymaps.userphotodisplay.util;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+
+import com.citymaps.userphotodisplay.model.UserPhoto;
+
+import android.net.Uri;
+import android.util.Log;
+
+public class UserJsonParser {
+	public static final String TAG = "UserJsonParser";
+	
+	private static final String ENDPOINT = "http://ndev-coreapi.citymaps.com/v2/activity/";
+	private static final String USER_ID = "8ea239c4-c648-4009-a252-a220e018dc4b";
+	private static final String OFFSET = "0";
+	private static final String LIMIT = "20";
+	
+	private static final String ACTIVITIES_KEY = "activities";
+	private static final String IMAGE_KEY = "image_url";
+	
+	byte[] getUrlBytes(String urlSpec) throws IOException {
+		URL url = new URL(urlSpec);
+		HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+		
+		try {
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			InputStream in = connection.getInputStream();
+			
+			if(connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+				return null;
+			}
+			
+			int bytesRead = 0;
+			byte[] buffer = new byte[1024];
+			while((bytesRead = in.read(buffer)) > 0) {
+				out.write(buffer, 0, bytesRead);
+			}
+			out.close();
+			return out.toByteArray();
+		} finally {
+			connection.disconnect();
+		}
+	}
+	
+	public String getFromHttp(String url) {
+		String responseString = null;
+		try {
+		DefaultHttpClient client = new DefaultHttpClient();
+		HttpResponse response = null; // some response object
+		HttpGet get = new HttpGet(url);
+		HttpEntity httpEntity;
+		
+		response = client.execute(get);
+		
+		httpEntity = response.getEntity();
+        responseString = EntityUtils.toString(httpEntity);
+		}
+		catch(UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+		Log.i("jsonparser", responseString);
+        return responseString;
+        
+        /*
+		BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+		StringBuilder builder = new StringBuilder();
+		for (String line = null; (line = reader.readLine()) != null;) {
+		    builder.append(line).append("\n");
+		}
+		JSONTokener tokener = new JSONTokener(builder.toString());
+		JSONArray finalResult = new JSONArray(tokener);
+		return finalResult;
+		*/
+	}
+	
+    public ArrayList<UserPhoto> downloadPhotos(String url) {
+        ArrayList<UserPhoto> items = new ArrayList<UserPhoto>();
+        parseJson(getFromHttp(url), items);
+        Log.i("parseJSON", "items length is " + items.size());
+        return items;
+    }
+    
+    public void parseJson(String jsonStr, ArrayList<UserPhoto> items) {
+    	if(jsonStr != null) {
+    		try {
+				JSONObject jsonobject = new JSONObject(jsonStr);
+				JSONArray jsonArray = jsonobject.getJSONArray(ACTIVITIES_KEY);
+				
+				for(int ind = 0; ind < jsonArray.length(); ind++) {
+					JSONObject obj = jsonArray.getJSONObject(ind);
+					
+					JSONArray imageURLArray = obj.getJSONArray(IMAGE_KEY);
+					
+					String imageUrl = imageURLArray.getString(0);
+					Log.i("parser", imageUrl);
+					UserPhoto photo = new UserPhoto();
+					photo.setUrl(imageUrl);
+
+					items.add(photo);
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+    	}
+    }
+    
+    /**
+     * Called by GetUserPhotosTask to fetch from api, returns an arrayList of Photo objects
+     * @return
+     */
+    public ArrayList<UserPhoto> fetchItems(int offset) {
+    	/*
+        String url = Uri.parse(ENDPOINT).buildUpon()
+        		.appendPath("user/" + USER_ID + "/")
+                .appendQueryParameter("images?offset", OFFSET)
+                .appendQueryParameter("limit", LIMIT)
+                .build().toString();
+        */
+    	String url = "http://ndev-coreapi.citymaps.com/v2/activity/user/8ea239c4-c648-4009-a252-a220e018dc4b/";
+    	url = url.concat("images?offset=" + String.valueOf(offset));
+    	url = url.concat("&limit=" + LIMIT);
+        Log.i("TAG", "URL is " + url);
+        return downloadPhotos(url);
+        
+
+    }
+    
+
+}

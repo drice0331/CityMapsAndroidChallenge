@@ -1,0 +1,48 @@
+package com.citymaps.userphotodisplay.ui;
+
+import com.citymaps.userphotodisplay.R;
+import com.citymaps.userphotodisplay.util.GetUserPhotosTask;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+
+public class PhotoDisplayActivity extends BaseActivity implements GetUserPhotosTask.GetUserPhotosTaskListener {
+	
+	private final static String TAG = "PhotoDisplayActivity";
+	
+	GetUserPhotosTask gupTask;
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_photo_display);
+		
+		gupTask = new GetUserPhotosTask(this);
+		gupTask.execute();
+		
+	}
+
+	@Override
+	public void onTaskPreExecute() {
+		Log.i(TAG, "pre executing");
+		
+	}
+
+	@Override
+	public void onTaskBackgroundWork() {
+		Log.i(TAG, "backgrounding");
+		
+	}
+
+	@Override
+	public void onTaskPostExecute() {
+		Log.i(TAG, "post executing");
+		
+	}
+	
+	public void taskFetch(View view) {
+		gupTask.execute();
+	}
+}

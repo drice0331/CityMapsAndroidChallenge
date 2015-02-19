@@ -1,0 +1,126 @@
+package com.citymaps.userphotodisplay.ui;
+
+import java.util.ArrayList;
+
+import com.android.volley.toolbox.ImageLoader;
+import com.citymaps.userphotodisplay.R;
+import com.citymaps.userphotodisplay.adapter.LoadingListViewAdapter;
+import com.citymaps.userphotodisplay.model.UserPhoto;
+import com.citymaps.userphotodisplay.model.UserPhotoList;
+import com.citymaps.userphotodisplay.util.LoadUserPhotosTask;
+import com.costum.android.widget.LoadMoreListView;
+import com.costum.android.widget.LoadMoreListView.OnLoadMoreListener;
+import com.citymaps.userphotodisplay.util.MyVolleySingleton;
+
+import android.app.Activity;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.GridLayoutAnimationController;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
+import android.widget.BaseAdapter;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+
+public class PhotoDisplayActivity extends Activity implements
+		LoadUserPhotosTask.LoadUserPhotosTaskListener {
+
+	private final static String TAG = "PhotoDisplayActivity";
+
+	ArrayList<UserPhoto> mItems;
+
+	private ProgressBar spinner;
+	ImageLoader mImageLoader;
+	LoadMoreListView listView;
+	LoadingListViewAdapter adapter;
+	
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_photo_display);
+        
+        mImageLoader = MyVolleySingleton.getInstance(this).getImageLoader();
+        
+		listView = (LoadMoreListView) findViewById(R.id.listview);
+		//listView.setVisibility(View.INVISIBLE);
+
+		mItems = UserPhotoList.get(this).getUserPhotoList();
+
+		adapter = new LoadingListViewAdapter(this, android.R.layout.simple_list_item_1, mItems, mImageLoader);
+		listView.setAdapter(adapter);
+		
+		new LoadUserPhotosTask(this).execute();
+		// updateAdapter();
+
+		//TODO - check this, might have to implement in activity
+		final Context context = this;
+		listView.setOnLoadMoreListener(new OnLoadMoreListener() {
+			public void onLoadMore() {
+				new LoadUserPhotosTask(context).execute();
+			}
+		});
+
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		Log.i(TAG, "Background thread destroyed");
+	}
+
+	@Override
+	public void onTaskPreExecute() {
+		Log.i(TAG, "pre executing");
+		// loading animation
+		listView.setVisibility(View.GONE);
+		spinner = (ProgressBar) findViewById(R.id.progressBar1);
+		spinner.setVisibility(View.VISIBLE);
+	}
+
+	@Override
+	public void onTaskPostExecute() {
+		Log.i(TAG, "post executing");
+		updateAdapter();
+		spinner.setVisibility(View.GONE);
+		listView.setVisibility(View.VISIBLE);
+		listView.onLoadMoreComplete();
+		// gridview.getAdapter().notify();
+	}
+
+	@Override
+	public void onTaskCancel() {
+		
+	}
+
+	void updateAdapter() {
+		Log.d("TAG", "set up adapter");
+		if (mItems == null || listView == null) {
+			Log.d("TAG", "photo list null");
+			return;
+		}
+		if (mItems != null) {
+			if (adapter != null) {
+				adapter.notifyDataSetChanged();
+			} 
+
+		} else {
+			listView.setAdapter(null);
+		}
+	}
+
+	/*
+	@Override
+	public void onLoadMore() {
+		new LoadUserPhotosTask(this).execute();
+
+	}*/
+
+}

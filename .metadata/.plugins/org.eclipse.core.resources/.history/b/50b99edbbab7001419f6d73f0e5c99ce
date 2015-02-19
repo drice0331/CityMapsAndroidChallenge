@@ -1,0 +1,44 @@
+package com.citymaps.userphotodisplay.util;
+
+import android.content.Context;
+import android.os.AsyncTask;
+
+public class LoadAvatarTask extends AsyncTask<Void, Void, String> {
+
+	LoadAvatarPhotoTaskListener listener;
+	Context mContext;
+
+	public LoadAvatarTask(Context listener) {
+		mContext = listener;
+		this.listener = (LoadAvatarPhotoTaskListener) listener;
+	}
+
+
+	@Override
+	protected String doInBackground(Void... params) {
+		// listener.onTaskBackgroundWork();
+		if (isCancelled()) {
+			return null;
+		}
+
+		return new UserJsonParser().fetchAvatarUrl();
+	}
+
+	@Override
+	protected void onPostExecute(String result) {
+		listener.onTaskPostExecute(result);
+		super.onPostExecute(result);
+	}
+
+	@Override
+	protected void onCancelled() {
+		// Notify the loading more operation has finished
+		listener.onTaskCancel();
+	}
+
+	// Callbacks for interacting with activity on UI Thread
+	public interface LoadAvatarTaskListener {
+		void onAvatarTaskPostExecute(String result);
+		void onAvatarTaskCancel();
+	}
+}

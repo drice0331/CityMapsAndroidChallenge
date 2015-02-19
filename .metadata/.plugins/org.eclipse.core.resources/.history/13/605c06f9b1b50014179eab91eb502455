@@ -1,0 +1,7 @@
+package com.citymaps.userphotodisplay.view;
+
+import android.widget.ListView;
+
+public class LoadingListView extends ListView {
+
+}

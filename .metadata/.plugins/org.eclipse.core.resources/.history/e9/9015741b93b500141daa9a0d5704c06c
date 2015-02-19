@@ -1,0 +1,5 @@
+package com.citymaps.userphotodisplay.util;
+
+public class GetUserPhotosTask {
+
+}

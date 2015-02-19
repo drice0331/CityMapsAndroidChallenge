@@ -1,0 +1,60 @@
+package com.citymaps.userphotodisplay.model;
+
+import android.graphics.Bitmap;
+
+public class UserPhoto {
+
+	public UserPhoto() {
+		
+	}
+	
+	private String mCaption;
+	private String mId;
+	private String mUrl;
+	private Bitmap bitmap;
+	private boolean bitmapLoaded;
+
+	public String getCaption() {
+		return mCaption;
+	}
+
+	public void setCaption(String caption) {
+		this.mCaption = caption;
+	}
+
+	public String getId() {
+		return mId;
+	}
+
+	public void setId(String id) {
+		this.mId = id;
+	}
+
+	public String getUrl() {
+		return mUrl;
+	}
+
+	public void setUrl(String url) {
+		this.mUrl = url;
+	}
+
+	public String toString() {
+		return mCaption;
+	}
+
+	public Bitmap getBitmap() {
+		return bitmap;
+	}
+
+	public void setBitmap(Bitmap bitmap) {
+		this.bitmap = bitmap;
+	}
+
+	public boolean isBitmapLoaded() {
+		return bitmapLoaded;
+	}
+
+	public void setBitmapLoaded(boolean bitmapLoaded) {
+		this.bitmapLoaded = bitmapLoaded;
+	}
+}

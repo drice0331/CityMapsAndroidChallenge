@@ -1,0 +1,13 @@
+package com.citymaps.userphotodisplay.view;
+
+import android.content.Context;
+import android.widget.ListView;
+
+public class LoadingListView extends ListView {
+
+	public LoadingListView(Context context) {
+		super(context);
+		// TODO Auto-generated constructor stub
+	}
+
+}

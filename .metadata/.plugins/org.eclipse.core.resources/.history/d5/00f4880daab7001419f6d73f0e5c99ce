@@ -1,0 +1,135 @@
+package com.citymaps.userphotodisplay.ui;
+
+import java.util.ArrayList;
+
+import com.android.volley.toolbox.ImageLoader;
+import com.citymaps.userphotodisplay.R;
+import com.citymaps.userphotodisplay.adapter.LoadingGridViewAdapter;
+import com.citymaps.userphotodisplay.model.UserPhoto;
+import com.citymaps.userphotodisplay.model.UserPhotoList;
+import com.citymaps.userphotodisplay.util.LoadUserPhotosTask;
+import com.costum.android.widget.LoadMoreListView;
+import com.citymaps.userphotodisplay.util.MyVolleySingleton;
+
+import android.app.Activity;
+import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.GridLayoutAnimationController;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
+import android.widget.BaseAdapter;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+
+public class PhotoDisplayActivity extends Activity implements
+		LoadUserPhotosTask.LoadUserPhotosTaskListener {
+
+	private final static String TAG = "PhotoDisplayActivity";
+
+	ArrayList<UserPhoto> mItems;
+
+	private ProgressBar spinner;
+	ImageLoader mImageLoader;
+	LoadMoreListView listView;
+	LoadingGridViewAdapter adapter;
+	
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_photo_display);
+
+        if(savedInstanceState != null) {
+        	mItems = savedInstanceState.getParcelableArrayList("userphotolist");
+        	if(mItems != null) {
+        		
+        	} 
+        } else {
+        	mItems = new ArrayList<UserPhoto>();
+        }
+        
+        mImageLoader = MyVolleySingleton.getInstance(this).getImageLoader();
+        
+		listView = (LoadMoreListView) findViewById(R.id);
+		//listView.setVisibility(View.INVISIBLE);
+
+
+		mItems = UserPhotoList.get(this).getUserPhotoList();
+		new LoadUserPhotosTask(this).execute(mItems.size());
+		// updateAdapter();
+
+		gridview.setOnScrollListener(this);
+		gridview.setOnLoadMoreListener(this);
+
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		Log.i(TAG, "Background thread destroyed");
+	}
+
+	@Override
+	public void onTaskPreExecute() {
+		Log.i(TAG, "pre executing");
+		// loading animation
+		spinner = (ProgressBar) findViewById(R.id.progressBar1);
+		spinner.setVisibility(View.VISIBLE);
+	}
+
+	@Override
+	public void onTaskPostExecute() {
+		Log.i(TAG, "post executing");
+		mItems = photos;
+		updateAdapter();
+		spinner.setVisibility(View.GONE);
+		gridview.setVisibility(View.VISIBLE);
+		gridview.onLoadMoreComplete();
+		// gridview.getAdapter().notify();
+	}
+
+	@Override
+	public void onTaskCancel() {
+		
+	}
+	
+	// TODO-test onclick method, get rid of later
+	public void taskFetch(View view) {
+		new LoadUserPhotosTask(this).execute();
+	}
+
+	void updateAdapter() {
+		Log.d("TAG", "set up adapter");
+		if (mItems == null || gridview == null) {
+			Log.d("TAG", "photo list null");
+
+			return;
+		}
+		if (mItems != null) {
+			if (gridview.getAdapter() != null) {
+				BaseAdapter base;
+				base = (BaseAdapter) gridview.getAdapter();
+				base.notifyDataSetChanged();
+			} else {
+				gridview.setAdapter(new LoadingGridViewAdapter(this, mItems,
+						 mPhotoDownloaderThread));
+			}
+
+		} else {
+			gridview.setAdapter(null);
+		}
+	}
+
+	@Override
+	public void onLoadMore() {
+		new LoadUserPhotosTask(this).execute();
+
+	}
+
+}

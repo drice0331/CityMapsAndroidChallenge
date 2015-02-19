@@ -1,0 +1,45 @@
+package com.citymaps.userphotodisplay.adapter;
+
+import java.util.ArrayList;
+
+import com.citymaps.userphotodisplay.R;
+import com.citymaps.userphotodisplay.model.UserPhoto;
+import com.citymaps.userphotodisplay.util.PhotoDownloader;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+
+public class LoadingGridViewAdapter extends ArrayAdapter<UserPhoto> {
+
+	Context mContext;
+	PhotoDownloader<ImageView> mPhotoDownloaderThread;
+	
+	public LoadingGridViewAdapter(Context context, ArrayList<UserPhoto> items, PhotoDownloader<ImageView> photoDownloaderThread) {
+		super(context, 0, items);
+		mContext = context;
+		mPhotoDownloaderThread = photoDownloaderThread;
+		
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		if (convertView == null) {
+			
+			LayoutInflater infalInflater = (LayoutInflater) this.mContext
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = infalInflater.inflate(R.layout.list_item_photo, null);
+		}
+
+		ImageView imageView = (ImageView) convertView
+				.findViewById(R.id.gallery_item_imageView);
+		imageView.setImageResource(R.drawable.brian_up_close);
+		UserPhoto item = getItem(position);
+		mPhotoDownloaderThread.queueThumbnail(imageView, item.getUrl());
+
+		return convertView;
+	}
+}

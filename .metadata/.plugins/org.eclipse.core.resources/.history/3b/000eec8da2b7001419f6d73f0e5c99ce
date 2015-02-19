@@ -1,0 +1,53 @@
+package com.citymaps.userphotodisplay.util;
+
+import java.util.ArrayList;
+
+import com.citymaps.userphotodisplay.model.UserPhoto;
+import com.citymaps.userphotodisplay.model.UserPhotoList;
+
+import android.content.Context;
+import android.os.AsyncTask;
+
+public class GetUserPhotosTask extends AsyncTask<Integer,Void,ArrayList<UserPhoto>>{
+
+	GetUserPhotosTaskListener listener;
+	Context mContext;
+	
+	public GetUserPhotosTask(Context listener) {
+		mContext = listener;
+		this.listener = (GetUserPhotosTaskListener)listener;
+	}
+	
+	@Override
+	protected void onPreExecute() {
+		super.onPreExecute();
+		listener.onTaskPreExecute();
+	}
+	
+	@Override
+	protected ArrayList<UserPhoto> doInBackground(Integer ... offset) {
+		//listener.onTaskBackgroundWork();
+		if(listener == null) {
+			return new ArrayList<UserPhoto>();
+		}
+		//TODO-edit
+		UserPhotoList userPhotoList = UserPhotoList.get(mContext);
+		userPhotoList.addUserPhotoList(new UserJsonParser().fetchItems(offset[0]));
+
+		return userPhotoList.getUserPhotoList();
+	}
+	
+	@Override
+	protected void onPostExecute(ArrayList<UserPhoto> photos) {
+		super.onPostExecute(photos);
+		listener.onTaskPostExecute(photos);
+	}
+
+
+
+	public interface GetUserPhotosTaskListener {
+		void onTaskPreExecute();
+		void onTaskPostExecute(ArrayList<UserPhoto> photos);
+	}
+	
+}

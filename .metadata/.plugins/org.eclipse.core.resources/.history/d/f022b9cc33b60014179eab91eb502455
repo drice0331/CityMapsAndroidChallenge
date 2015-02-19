@@ -1,0 +1,38 @@
+package com.citymaps.userphotodisplay.view;
+
+import com.citymaps.userphotodisplay.R;
+
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.util.AttributeSet;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
+
+public class LoadingImageView extends ImageView {
+
+	Animation fadeIn;
+
+	public LoadingImageView(Context context) {
+		super(context);
+		init(context);
+	}
+
+	public LoadingImageView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		init(context);
+	}
+
+	private void init(Context context) {
+		fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in);
+		//setVisibility(View.INVISIBLE);
+	}
+
+	public void animateFadeIn() {
+		if (getVisibility() == View.INVISIBLE) {
+			setVisibility(View.VISIBLE);
+			startAnimation(fadeIn);	
+		}
+	}
+} 

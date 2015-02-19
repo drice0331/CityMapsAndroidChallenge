@@ -1,0 +1,34 @@
+package com.citymaps.userphotodisplay.ui;
+
+import android.os.Bundle;
+import android.widget.ImageView;
+
+import com.android.volley.toolbox.ImageLoader;
+
+/**
+ * Created by clive on 16-Jun-14.
+ * www.101apps.co.za
+ * displays the selected list/grid item image
+ */
+
+public class DisplayImageActivity extends MyMenuActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_display_image);
+
+        String url = getIntent().getStringExtra("url");
+
+        ImageView imageView = (ImageView) findViewById(R.id.imageView);
+
+        ImageLoader mImageLoader = MyVolleySingleton.getInstance(this).getImageLoader();
+        mImageLoader.get(url,
+                ImageLoader.getImageListener(imageView,
+                        R.drawable.costum_progress_bar,
+                        R.drawable.error),
+                600,
+                600
+        );
+    }
+}

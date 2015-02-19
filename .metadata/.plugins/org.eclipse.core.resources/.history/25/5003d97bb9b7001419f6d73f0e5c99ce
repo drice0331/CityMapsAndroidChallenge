@@ -1,0 +1,7 @@
+package com.citymaps.userphotodisplay.util;
+
+import android.os.AsyncTask;
+
+public class LoadAvatarTask extends AsyncTask<Params, Progress, Result> {
+
+}

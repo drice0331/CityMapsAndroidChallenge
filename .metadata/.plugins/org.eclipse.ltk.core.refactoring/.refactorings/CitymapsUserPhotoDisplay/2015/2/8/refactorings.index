@@ -1,0 +1,25 @@
+1424077700629	Rename type 'Photo'
+1424132352396	Encapsulate field 'imageLoaded'
+1424134245723	Encapsulate field 'bitmap'
+1424135364970	Encapsulate field 'bitmapLoaded'
+1424151068869	Delete element
+1424168838918	Rename field 'scrollState'
+1424171790846	Delete element
+1424233612851	Copy compilation unit
+1424234097738	Copy compilation unit
+1424236388077	Copy file
+1424236432013	Copy file
+1424283232139	Copy file
+1424284710730	Delete element
+1424284717220	Delete element
+1424284818843	Delete element
+1424285997510	Delete element
+1424286315671	Delete element
+1424286878893	Delete element
+1424286952180	Rename type 'GetUserPhotosTask'
+1424286983057	Rename type 'GetUserPhotosTaskListener'
+1424290622027	Rename type 'LoadingGridViewAdapter'
+1424298219491	Rename resource 'costum_progress_bar.xml'
+1424301141963	Rename type 'LaunchActivity'
+1424301734041	Delete element
+1424302502868	Rename type 'DisplayImageActivity'

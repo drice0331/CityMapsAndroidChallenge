@@ -1,0 +1,7 @@
+package com.citymaps.userphotodisplay.view;
+
+import android.widget.GridView;
+
+public class LoadingGridView extends GridView {
+
+}
